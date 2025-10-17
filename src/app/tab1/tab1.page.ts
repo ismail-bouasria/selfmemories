@@ -12,7 +12,6 @@ import {
   IonCol,
   IonImg,
 } from '@ionic/angular/standalone';
-import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { PhotoService } from '../service/photo-service';
 @Component({
   selector: 'app-tab1',
@@ -30,7 +29,6 @@ import { PhotoService } from '../service/photo-service';
     IonToolbar,
     IonTitle,
     IonContent,
-    ExploreContainerComponent,
   ],
 })
 export class Tab1Page {
