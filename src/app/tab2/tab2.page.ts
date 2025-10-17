@@ -2,6 +2,9 @@ import { AfterViewInit, Component } from '@angular/core';
 import { IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/angular/standalone';
 import { MapService } from '../service/map-service';
 
+
+
+
 @Component({
   selector: 'app-tab2',
   templateUrl: 'tab2.page.html',
@@ -10,8 +13,10 @@ import { MapService } from '../service/map-service';
 })
 export class Tab2Page implements AfterViewInit {
 
+//Icons
 
-  constructor(private mapService:MapService) {}
+  constructor(private mapService:MapService) {
+  }
 
   ngAfterViewInit(): void {
       const map = this.mapService.initMap('map', [5.3698, 43.2965], 12);

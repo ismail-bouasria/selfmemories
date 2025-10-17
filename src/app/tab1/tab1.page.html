@@ -21,7 +21,7 @@
   <ion-grid>
     <ion-row>
       @for (photo of photoService.photos; track photo.filepath) {
-      <ion-col size="3">
+      <ion-col size="6">
         <ion-card>
           <ion-card-header>
             <ion-card-title>Card Title</ion-card-title>
@@ -31,8 +31,10 @@
           <ion-card-content>
             <ion-img [src]="photo.webviewPath"></ion-img>
           </ion-card-content>
+          <ion-button fill="clear" (click)="photoService.toggleLike(photo)">
+            <ion-icon #heart name="heart" [color]="photo.liked ? 'danger' : 'medium'"></ion-icon>
+          </ion-button>
         </ion-card>
-
       </ion-col>
       }
     </ion-row>

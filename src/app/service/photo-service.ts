@@ -19,6 +19,9 @@ import { Platform } from '@ionic/angular';
 export interface UserPhoto {
   filepath: string;
   webviewPath?: string;
+  liked?:boolean;
+  coords?: { latitude: number; longitude: number }; // optionnel si tu veux la position
+  address?: string; // optionnel si tu veux l’adresse
 }
 
 @Injectable({
@@ -76,6 +79,16 @@ export class PhotoService {
     }
   }
 
+  public async toggleLike(photo: UserPhoto) {
+  photo.liked = !photo.liked;
+
+  // Sauvegarde la modification
+  await Preferences.set({
+    key: this.PHOTO_STORAGE,
+    value: JSON.stringify(this.photos),
+  });
+}
+
   // Function to take a photo
   public async addNewToGallery() {
     const hasPermission = await this.checkCameraPermission();
@@ -88,6 +101,10 @@ export class PhotoService {
 
     // Save the picture and add it to photo collection
     const savedImageFile = await this.savePicture(capturedPhoto);
+
+    // Ajoute la propriété liked = false par défaut
+  savedImageFile.liked = false;
+
     this.photos.unshift(savedImageFile);
     Preferences.set({
       key: this.PHOTO_STORAGE,
@@ -97,7 +114,7 @@ export class PhotoService {
 
   // Function to save Picture
 
-  private async savePicture(photo: Photo) {
+  private async savePicture(photo: Photo): Promise<UserPhoto> {
     // Convert photo to base64 format, required by Filesystem API to save
     const base64Data = await this.readAsBase64(photo);
 
@@ -114,6 +131,9 @@ export class PhotoService {
     return {
       filepath: fileName,
       webviewPath: photo.webPath,
+      liked:false,
+      //coords:{latitude:'',longitude:''}, 
+      //address: '',
     };
   }
 
