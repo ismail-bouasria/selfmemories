@@ -4,6 +4,9 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalo
 
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
+import { defineCustomElements } from '@ionic/pwa-elements/loader'; 
+// Active les éléments web d’Ionic pour la caméra web (input file caché)
+defineCustomElements(window);
 
 bootstrapApplication(AppComponent, {
   providers: [
