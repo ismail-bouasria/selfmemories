@@ -7,6 +7,13 @@ import {
 } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
+import { AlertController } from '@ionic/angular';
+import {
+  NativeSettings,
+  IOSSettings,
+  AndroidSettings,
+} from 'capacitor-native-settings';
+import { Platform } from '@ionic/angular';
 
 // Interface UserPhoto
 export interface UserPhoto {
@@ -21,8 +28,58 @@ export class PhotoService {
   public photos: UserPhoto[] = [];
   private PHOTO_STORAGE: string = 'photos';
 
+  constructor(private platform: Platform, private alertCtrl: AlertController) {}
+
+  // Méthode pour ouvrir les réglages si la caméra est refusée
+  async openAppSettings() {
+    if (this.platform.is('ios')) {
+      await NativeSettings.openIOS({ option: IOSSettings.App });
+    } else if (this.platform.is('android')) {
+      await NativeSettings.openAndroid({
+        option: AndroidSettings.ApplicationDetails,
+      });
+    } else {
+
+      await this.alertCtrl.create({
+      header: 'Permission refusée',
+      message: "Impossible d’ouvrir les réglages sur cette plateforme.",
+      buttons: ['OK'],
+    });
+    }
+  }
+
+  // Vérifie la permission avant de prendre une photo
+  async checkCameraPermission(): Promise<boolean> {
+    try {
+      const permission = await Camera.checkPermissions();
+
+      if (permission.camera === 'granted') {
+        return true;
+      } else if (permission.camera === 'denied') {
+        const openSettings = confirm(
+          "L'accès à la caméra est refusé. Voulez-vous ouvrir les réglages pour l'autoriser ?"
+        );
+        if (openSettings) {
+          await this.openAppSettings();
+        }
+        return false;
+      } else {
+        // Demande la permission
+        const request = await Camera.requestPermissions({
+          permissions: ['camera'],
+        });
+        return request.camera === 'granted';
+      }
+    } catch (err) {
+      console.error('Erreur permission caméra :', err);
+      return false;
+    }
+  }
+
   // Function to take a photo
   public async addNewToGallery() {
+    const hasPermission = await this.checkCameraPermission();
+    if (!hasPermission) return;
     const capturedPhoto = await Camera.getPhoto({
       resultType: CameraResultType.Uri,
       source: CameraSource.Camera,

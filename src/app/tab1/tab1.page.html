@@ -21,14 +21,20 @@
   <ion-grid>
     <ion-row>
       @for (photo of photoService.photos; track photo.filepath) {
-  <ion-col size="6">
-    <ion-img [src]="photo.webviewPath"></ion-img>
-  </ion-col>
-}
+      <ion-col size="3">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Card Title</ion-card-title>
+            <ion-card-subtitle>Card Subtitle</ion-card-subtitle>
+          </ion-card-header>
 
+          <ion-card-content>
+            <ion-img [src]="photo.webviewPath"></ion-img>
+          </ion-card-content>
+        </ion-card>
+
+      </ion-col>
+      }
     </ion-row>
   </ion-grid>
-
-  <!-- ion-fab markup  -->
-
 </ion-content>

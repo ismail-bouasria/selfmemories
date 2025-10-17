@@ -10,14 +10,13 @@ import {
   IonGrid,
   IonRow,
   IonCol,
-  IonImg,
-} from '@ionic/angular/standalone';
+  IonImg, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent } from '@ionic/angular/standalone';
 import { PhotoService } from '../service/photo-service';
 @Component({
   selector: 'app-tab1',
   templateUrl: 'tab1.page.html',
   styleUrls: ['tab1.page.scss'],
-  imports: [
+  imports: [IonCardContent, IonCardSubtitle, IonCardTitle, IonCardHeader, IonCard, 
     IonImg,
     IonCol,
     IonRow,
