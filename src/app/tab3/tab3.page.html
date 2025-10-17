@@ -1,17 +1,19 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>
-      Tab 3
-    </ion-title>
+    <ion-title>Galerie Photos</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  <h2>Toutes les photos</h2>
+  <div class="photo-grid">
+    <img *ngFor="let photo of allPhotos" [src]="photo.webviewPath" />
+  </div>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
-</ion-content>
+  <h2>Photos par ville</h2>
+  <ng-container *ngFor="let city of objectKeys(photosByCity)">
+    <h3>{{city}}</h3>
+    <div class="photo-grid">
+      <img *ngFor="let photo of photosByCity[city]" [src]="photo.webviewPath" />
+    </div>
+  </ng-container>

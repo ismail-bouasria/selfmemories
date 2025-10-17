@@ -1,2 +1,10 @@
 // For information on how to create your own theme, please see:
 // http://ionicframework.com/docs/theming/
+:root {
+  --ion-color-pink: #ff4d88;
+  --ion-color-pink-rgb: 255, 77, 136;
+  --ion-color-pink-contrast: #ffffff;
+  --ion-color-pink-contrast-rgb: 255, 255, 255;
+  --ion-color-pink-shade: #e0457a;
+  --ion-color-pink-tint: #ff6699;
+}

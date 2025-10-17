@@ -14,12 +14,13 @@ import {
   AndroidSettings,
 } from 'capacitor-native-settings';
 import { Platform } from '@ionic/angular';
+import { GeolocationService } from '../service/geolocation-service';
 
 // Interface UserPhoto
 export interface UserPhoto {
   filepath: string;
   webviewPath?: string;
-  liked?:boolean;
+  liked?: boolean;
   coords?: { latitude: number; longitude: number }; // optionnel si tu veux la position
   address?: string; // optionnel si tu veux l’adresse
 }
@@ -31,7 +32,46 @@ export class PhotoService {
   public photos: UserPhoto[] = [];
   private PHOTO_STORAGE: string = 'photos';
 
-  constructor(private platform: Platform, private alertCtrl: AlertController) {}
+  constructor(
+    private platform: Platform,
+    private alertCtrl: AlertController,
+    private geolocationService: GeolocationService
+  ) {}
+
+  // Supprime une photo: fichier + tableau + preferences
+  public async deletePhoto(photo: UserPhoto): Promise<boolean> {
+    try {
+      // 1) Supprime le fichier du filesystem (si présent)
+      if (photo.filepath) {
+        try {
+          await Filesystem.deleteFile({
+            path: photo.filepath,
+            directory: Directory.Data,
+          });
+          console.log('Fichier supprimé :', photo.filepath);
+        } catch (fsErr) {
+          // Sur web Directory.Data peut ne pas contenir le fichier → log, mais on continue
+          console.warn('Impossible de supprimer le fichier (peut-être web):', fsErr);
+        }
+      }
+
+      // 2) Retire la photo du tableau
+      this.photos = this.photos.filter(p => p.filepath !== photo.filepath);
+
+      // 3) Met à jour le storage
+      await Preferences.set({
+        key: this.PHOTO_STORAGE,
+        value: JSON.stringify(this.photos),
+      });
+
+      console.log('Photo supprimée de la liste et storage mis à jour.');
+      return true;
+    } catch (err) {
+      console.error('Erreur deletePhoto:', err);
+      return false;
+    }
+  }
+
 
   // Méthode pour ouvrir les réglages si la caméra est refusée
   async openAppSettings() {
@@ -42,12 +82,11 @@ export class PhotoService {
         option: AndroidSettings.ApplicationDetails,
       });
     } else {
-
       await this.alertCtrl.create({
-      header: 'Permission refusée',
-      message: "Impossible d’ouvrir les réglages sur cette plateforme.",
-      buttons: ['OK'],
-    });
+        header: 'Permission refusée',
+        message: 'Impossible d’ouvrir les réglages sur cette plateforme.',
+        buttons: ['OK'],
+      });
     }
   }
 
@@ -80,15 +119,16 @@ export class PhotoService {
   }
 
   public async toggleLike(photo: UserPhoto) {
-  photo.liked = !photo.liked;
+    photo.liked = !photo.liked;
 
-  // Sauvegarde la modification
-  await Preferences.set({
-    key: this.PHOTO_STORAGE,
-    value: JSON.stringify(this.photos),
-  });
-}
+    // Sauvegarde la modification
+    await Preferences.set({
+      key: this.PHOTO_STORAGE,
+      value: JSON.stringify(this.photos),
+    });
+  }
 
+  
   // Function to take a photo
   public async addNewToGallery() {
     const hasPermission = await this.checkCameraPermission();
@@ -99,11 +139,18 @@ export class PhotoService {
       quality: 100,
     });
 
+    // 🌍 Récupère coords + adresse via ton nouveau service
+    const { coords, address } = await this.geolocationService.getLocationData();
+
     // Save the picture and add it to photo collection
-    const savedImageFile = await this.savePicture(capturedPhoto);
+    const savedImageFile = (await this.savePicture(capturedPhoto)) as UserPhoto;
 
     // Ajoute la propriété liked = false par défaut
-  savedImageFile.liked = false;
+    savedImageFile.liked = false;
+
+    // Condition de la localisation de l'image
+    if (coords) savedImageFile.coords = coords;
+    if (address) savedImageFile.address = address;
 
     this.photos.unshift(savedImageFile);
     Preferences.set({
@@ -111,7 +158,7 @@ export class PhotoService {
       value: JSON.stringify(this.photos),
     });
   }
-
+  
   // Function to save Picture
 
   private async savePicture(photo: Photo): Promise<UserPhoto> {
@@ -131,11 +178,12 @@ export class PhotoService {
     return {
       filepath: fileName,
       webviewPath: photo.webPath,
-      liked:false,
-      //coords:{latitude:'',longitude:''}, 
+      liked: false,
+      //coords:{latitude:'',longitude:''},
       //address: '',
     };
   }
+
 
   private async readAsBase64(photo: Photo) {
     // Fetch the photo, read as a blob, then convert to base64 format
