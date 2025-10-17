@@ -1,0 +1,7 @@
+{
+  "name": "selfmemories",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
